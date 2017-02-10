@@ -38,6 +38,7 @@
         android:layout_below="@id/title_test_activity"
         android:id="@+id/ip_edittext_test_activity"
         android:gravity="center_vertical"
+        android:text="192.168.11.213"
         />
     <TextView
         android:layout_width="120dp"
@@ -56,6 +57,7 @@
         android:layout_below="@id/first_item_test_activity"
         android:id="@+id/port_edittext_test_activity"
         android:gravity="center_vertical"
+        android:text="8000"
         />
     <Button
         android:layout_width="match_parent"

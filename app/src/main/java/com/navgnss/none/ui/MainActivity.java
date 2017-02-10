@@ -48,6 +48,14 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    public void startTestActivity(View v){
+        Intent intent=new Intent(this,TestSocketActivity.class);
+
+        startActivity(intent);
+
+    }
+
+
     @Override
     protected void onDestroy() {
         unbindService(mySocketServiceConnection);

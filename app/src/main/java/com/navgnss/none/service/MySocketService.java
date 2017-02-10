@@ -66,13 +66,12 @@ public class MySocketService extends Service implements Runnable{
         IntentFilter filter=new IntentFilter();
         filter.addAction(Constants.START_SOCKET);
         filter.addAction(Constants.STOP_SOCKET);
-        getApplicationContext().registerReceiver(sbr,filter);
+        registerReceiver(sbr,filter);
 
        /* //测试错误ip/port能否鉴定
         connectService();*/
 
-        readThread=new Thread(MySocketService.this);
-        readThread.start();
+
         return binder;
     }
 
@@ -113,6 +112,9 @@ public class MySocketService extends Service implements Runnable{
     @Override
     public void run() {
 
+        connectService();
+
+
         try {
             while (true) {
                 Thread.sleep(500);
@@ -146,7 +148,7 @@ public class MySocketService extends Service implements Runnable{
      * TODO 处理接收到的数据
      * */
     private void getMessage(String content) {
-
+        Log.d(TAG,"service 解析出数据一条！ content="+content);
 
     }
 
@@ -167,6 +169,7 @@ public class MySocketService extends Service implements Runnable{
           Log.d(TAG,"socket新建成功！");
           SocketAddress socketAddress = new InetSocketAddress(InetAddress.getByName(host), port);
           Log.d(TAG,"socketAddress新建成功！/n+port="+port+",host="+host);
+
           socket.connect(socketAddress, 3000);
           Log.d(TAG,"socket成功链接！");
           reader=new BufferedReader(new InputStreamReader(socket.getInputStream(),"GBK"));
@@ -175,26 +178,30 @@ public class MySocketService extends Service implements Runnable{
 
       }
       catch (UnknownHostException e){
-            Log.d(TAG,"ip地址或端口设置错误！");
+            Log.d(TAG,"ip地址或端口设置错误1！"+e.getMessage());
             sendBroadcastForException(1);
           return;
       }
       catch (SocketException e){
-            Log.d(TAG,"socketException!");
+            Log.d(TAG,"socketException2!"+e.getMessage());
             sendBroadcastForException(2);
           return;
       }
       catch(SocketTimeoutException e){
             e.printStackTrace();
+          Log.d(TAG,"TimeoutException3!"+"e.message="+e.getMessage()+"e.cause="+e.getCause());
             sendBroadcastForException(3);
           return;
       }
-      catch(RuntimeException e){
-          e.printStackTrace();
-          Log.d(TAG,"ip地址或端口设置错误！");
-          sendBroadcastForException(1);
+      catch(IOException e){
+          Log.d(TAG,"socket连接出错!"+"e.message="+e.getMessage()+",e.cause="+e.getCause());
           return;
-
+      }
+      catch(RuntimeException e){
+              e.printStackTrace();
+              Log.d(TAG,"ip地址或端口设置错误4！"+e.getMessage()+e.getCause());
+              sendBroadcastForException(1);
+              return;
       }
         catch (Exception e){
             e.printStackTrace();
@@ -225,13 +232,15 @@ public class MySocketService extends Service implements Runnable{
             String action=intent.getAction();
 
             if(action.equals(Constants.START_SOCKET)){
+                Log.d(TAG,"service 接到广播，开始connectService！");
                 host=  intent.getStringExtra("host");
                 port= intent.getIntExtra("port",-1);
-                connectService();
-                Log.d(TAG,"service 接到广播，开始connectService！");
+              //  connectService();
+                readThread=new Thread(MySocketService.this);
+                readThread.start();
             }
             else if(action.equals(Constants.STOP_SOCKET)){
-                closeConnect();
+                //closeConnect();
             }
 
         }
